@@ -270,3 +270,8 @@ pyrightconfig.json
 *.jpeg
 *.mp4
 *.mp3
+
+package.json
+package-lock.json
+data.json
+groups.js
