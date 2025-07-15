@@ -1,0 +1,31 @@
+{
+  "WEEK_NUMBER": 0,
+  "assignedTasks": [
+    {
+      "userId": "U02FB1XPYKY",
+      "location": "203"
+    },
+    {
+      "userId": "U05UY97LQGL",
+      "location": "201"
+    },
+    {
+      "userId": "U07PZ76K5C1",
+      "location": "204"
+    },
+    {
+      "userId": "U07PHLMEJ3X",
+      "location": "205"
+    },
+    {
+      "userId": "U07GW5GMJQY",
+      "location": "sink"
+    },
+    {
+      "userId": "U05UVN1HDK5",
+      "location": "corridor"
+    }
+  ],
+  "consecutiveDays": 0,
+  "messageTimestamp": "1742689528.231469"
+}
