@@ -270,3 +270,5 @@ pyrightconfig.json
 *.jpeg
 *.mp4
 *.mp3
+
+config.py
