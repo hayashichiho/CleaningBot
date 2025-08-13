@@ -1,9 +1,7 @@
-// groups.js
-const groupA = ['王慧涛', 'Yoshito MIKADO', '服部瑞生', 'ディエゴ', '田中一輝', '金子慧士', '安藤颯', 'Yamada Aiki', '林知歩', '白井正真'];
-const groupB = ['LIZhe', '森下裕咲子', '鈴木萌仁伽', '宮沢知穂', '大瀧陽', '根本大雅', '辻美里', '村山拳太', '古俣朝陽'];
-//'Linman Shen'
+const groupA = ['白井正真', '村山拳太'];
+const groupB = ['林知歩', '古俣朝陽'];
 
-exports.getGroup = (name) => {
+function getGroup(name) { // 「exports.」を削除し、標準の関数定義に変更
   if (groupA.includes(name)) {
     return 'A';
   } else if (groupB.includes(name)) {
@@ -11,4 +9,4 @@ exports.getGroup = (name) => {
   } else {
     return null;
   }
-};
+}

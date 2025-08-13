@@ -10,6 +10,29 @@ function getDataSheet() {
   return sheet;
 }
 
+function getConfigSheet() {
+  const sheet = getSpreadsheet().getSheetByName('Config');
+  if (!sheet) {
+    Logger.log('Config sheet not found. Please create a sheet named "Config".');
+    return null;
+  }
+  return sheet;
+}
+
+/**
+ * スプレッドシートの「Config」シートから設定情報を読み込みます。
+ * @returns {object} 設定情報
+ */
+function loadConfig() {
+  // config.gsに定数として設定した値を返します
+  return {
+    SLACK_BOT_TOKEN: SLACK_BOT_TOKEN,
+    CHANNEL_ID: CHANNEL_ID,
+    YOUR_BOT_USER_ID: YOUR_BOT_USER_ID
+  };
+}
+
+
 /**
  * スプレッドシートからデータを読み込みます。
  * @returns {object} ボットの状態データ

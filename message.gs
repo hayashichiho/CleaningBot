@@ -33,5 +33,3 @@ const thanksMessage = [
   'It’s inspiring to have such a clean environment, thank you!',
   'Your constant cleaning really helps a lot, thank you so much!'
 ];
-
-module.exports = thanksMessage;

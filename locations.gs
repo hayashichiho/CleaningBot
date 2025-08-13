@@ -1,4 +1,3 @@
-// locations.js
 const cleaningLocations = [
   '201',
   '203',
@@ -8,7 +7,7 @@ const cleaningLocations = [
   'sink',
 ];
 
-exports.getLocations = () => {
+function getLocations() { // 「exports.」を削除し、標準の関数定義に変更
   const date = new Date();
   const month = date.getMonth() + 1;
 

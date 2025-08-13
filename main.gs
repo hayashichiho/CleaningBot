@@ -1,13 +1,19 @@
-/**
- * この関数は時間主導型トリガーによって実行されます。
- * 毎週日曜日の15:00に掃除当番の割り当てを行います。
- */
+// メインスクリプト
 function performScheduledTasks() {
+  Logger.log('--- 🤖 スクリプト開始 ---');
+
+  // データ読み込み
   const config = loadConfig();
-  const { WEEK_NUMBER, assignedTasks, consecutiveDays, messageTimestamp } = loadData();
+  Logger.log('config読み込み完了: ' + JSON.stringify(config));
+
+  const data = loadData();
+  const { WEEK_NUMBER, assignedTasks, consecutiveDays, messageTimestamp } = data;
+  Logger.log('スプレッドシートから読み込んだデータ: ' + JSON.stringify(data));
 
   // 前回のリアクションを処理し、タスクを更新
-  let updatedAssignedTasks = processCompletedTasks(config.CHANNEL_ID, messageTimestamp, assignedTasks);
+  Logger.log('前回のメッセージのタイムスタンプ: ' + messageTimestamp);
+  let updatedAssignedTasks = processCompletedTasks(config.CHANNEL_ID, messageTimestamp, assignedTasks, config.SLACK_BOT_TOKEN);
+  Logger.log('リアクション処理後の未完了タスク: ' + JSON.stringify(updatedAssignedTasks));
 
   // 掃除当番の割り当てとメッセージの送信
   const result = assignTasks(
@@ -17,6 +23,7 @@ function performScheduledTasks() {
     consecutiveDays,
     config.SLACK_BOT_TOKEN
   );
+  Logger.log('割り当て完了後の結果: ' + JSON.stringify(result));
 
   // 新しいデータをスプレッドシートに保存
   saveData({
@@ -25,4 +32,7 @@ function performScheduledTasks() {
     consecutiveDays: result.newConsecutiveDays,
     messageTimestamp: result.newMessageTimestamp,
   });
+  Logger.log('新しいデータをスプレッドシートに保存しました。');
+
+  Logger.log('--- ✅ スクリプト終了 ---');
 }
