@@ -271,4 +271,5 @@ pyrightconfig.json
 *.mp4
 *.mp3
 
-config.py
+config.gs
+
