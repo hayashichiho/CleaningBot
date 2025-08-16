@@ -1,4 +1,3 @@
-
 function doPost(e) {
   const config = loadConfig();
   const payload = e.parameter;

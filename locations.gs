@@ -1,13 +1,13 @@
 const cleaningLocations = [
-  '201',
-  '203',
-  '204',
-  '205',
-  'corridor',
-  'sink',
+ '201',
+ '203',
+ '204',
+ '205',
+ 'corridor',
+ 'sink',
 ];
 
-function getLocations() { // 「exports.」を削除し、標準の関数定義に変更
+function getLocations() {
   const date = new Date();
   const month = date.getMonth() + 1;
 
@@ -15,5 +15,5 @@ function getLocations() { // 「exports.」を削除し、標準の関数定義�
     return cleaningLocations;
   } else { // 奇数月の場合
     return cleaningLocations.filter(location => location !== 'corridor' && location !== 'sink');
-  }
+ }
 };
