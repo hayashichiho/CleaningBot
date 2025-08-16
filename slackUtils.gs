@@ -1,5 +1,5 @@
 /**
- * Slack APIを呼び出してチャンネルメンバーを取得します。
+ * Slack APIを呼び出してチャンネルメンバーを取得する関数
  */
 function fetchChannelMembers(channelId, token) {
   const url = `https://slack.com/api/conversations.members?channel=${channelId}`;
@@ -22,7 +22,7 @@ function fetchChannelMembers(channelId, token) {
 }
 
 /**
- * Slack APIを呼び出してユーザー情報を取得します。
+ * Slack APIを呼び出してユーザー情報を取得する関数
  */
 function fetchUserInfo(userId, token) {
   const url = `https://slack.com/api/users.info?user=${userId}`;
@@ -42,7 +42,7 @@ function fetchUserInfo(userId, token) {
 }
 
 /**
- * Slack APIを呼び出してメッセージを投稿します。
+ * Slack APIを呼び出してメッセージを投稿する関数
  * @returns {string} 投稿されたメッセージのタイムスタンプ
  */
 function postMessage(channelId, text, token) {
@@ -81,7 +81,7 @@ function postMessage(channelId, text, token) {
 }
 
 /**
- * 前回のメッセージへのリアクションを取得します。
+ * 前回のメッセージへのリアクションを取得する関数
  * @returns {Array} リアクションの配列
  */
 function getReactions(channelId, timestamp, token) {

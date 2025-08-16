@@ -1,40 +1,17 @@
 /**
- * タイムスタンプのテスト関数
- */
-function testTimestamp() {
-  const config = loadConfig();
-  const testMessage = "タイムスタンプテスト用メッセージ";
-
-  Logger.log('テストメッセージを投稿します...');
-  const timestamp = postMessage(config.CHANNEL_ID, testMessage, config.SLACK_BOT_TOKEN);
-  Logger.log('取得したタイムスタンプ: ' + timestamp);
-
-  // 少し待ってからリアクションを確認
-  Utilities.sleep(2000);
-
-  Logger.log('リアクションを確認します...');
-  const reactions = getReactions(config.CHANNEL_ID, timestamp, config.SLACK_BOT_TOKEN);
-  Logger.log('リアクション結果: ' + JSON.stringify(reactions));
-}
-
-
+* 指定したIDのスプレッドシートを取得
+*/
 function getSpreadsheet() {
   return SpreadsheetApp.openById(SPREADSHEET_ID);
 }
 
+/**
+* 「Data」シートを取得
+*/
 function getDataSheet() {
   const sheet = getSpreadsheet().getSheetByName('Data');
   if (!sheet) {
     return getSpreadsheet().insertSheet('Data');
-  }
-  return sheet;
-}
-
-function getConfigSheet() {
-  const sheet = getSpreadsheet().getSheetByName('Config');
-  if (!sheet) {
-    Logger.log('Config sheet not found. Please create a sheet named "Config".');
-    return null;
   }
   return sheet;
 }
@@ -58,6 +35,8 @@ function loadConfig() {
  */
 function loadData() {
   const sheet = getDataSheet();
+
+  // データがない場合
   if (sheet.getLastRow() < 2) {
     return {
       WEEK_NUMBER: 0,
@@ -67,9 +46,11 @@ function loadData() {
     };
   }
 
+  // データ読み込み
   const header = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
   const data = sheet.getRange(2, 1, 1, sheet.getLastColumn()).getValues()[0];
 
+  // タスクデータ取得
   let assignedTasks = [];
   try {
     const tasksData = data[header.indexOf('assignedTasks')];
@@ -77,17 +58,16 @@ function loadData() {
       assignedTasks = JSON.parse(tasksData);
     }
   } catch (e) {
-    Logger.log('Failed to parse assignedTasks JSON: ' + e.message);
+    Logger.log('タスクデータ読み込みに失敗しました: ' + e.message);
     assignedTasks = [];
   }
 
-  // messageTimestampを安全に取得（必ず文字列として扱う）
+  // 時間データ取得
   let messageTimestamp = '';
   const tsIndex = header.indexOf('messageTimestamp');
   if (tsIndex !== -1 && data[tsIndex] !== null && data[tsIndex] !== undefined) {
-    // 数値の場合でも文字列に変換し、精度を保つ
     messageTimestamp = String(data[tsIndex]);
-    // 科学的記数法（1.23E+10）を通常の数値表記に変換
+
     if (messageTimestamp.includes('E') || messageTimestamp.includes('e')) {
       messageTimestamp = parseFloat(messageTimestamp).toFixed(6);
     }
