@@ -88,7 +88,7 @@ function assignTasks(channelId, WEEK_NUMBER, incompleteTasks, consecutiveDays, t
   const newWEEK_NUMBER = (WEEK_NUMBER % 2 === 0) ? WEEK_NUMBER + 1 : WEEK_NUMBER - 1;
   let newAssignedTasks = [];
   const is_AGroup = (newWEEK_NUMBER % 2 === 0);
-  const cleaningAreas = shuffle(getLocations());
+  const cleaningAreas = getLocations();
   Logger.log('掃除場所の数: ' + cleaningAreas.length);
 
   let messageText = '';
@@ -99,15 +99,17 @@ function assignTasks(channelId, WEEK_NUMBER, incompleteTasks, consecutiveDays, t
 
   if (is_AGroup) {
     messageText += `今週の掃除担当はグループAです\n`;
-    for (let i = 0; i < groupAMembers.length && i < cleaningAreas.length; i++) {
-      messageText += `${cleaningAreas[i]}: <@${groupAMembers[i].user}>\n`;
-      newAssignedTasks.push({ userId: groupAMembers[i].user, location: cleaningAreas[i] });
+    for (let i = 0; i < cleaningAreas.length; i++) {
+      const member = groupAMembers[i % groupAMembers.length]; // メンバーを繰り返す
+      messageText += `${cleaningAreas[i]}: <@${member.user}>\n`;
+      newAssignedTasks.push({ userId: member.user, location: cleaningAreas[i] });
     }
   } else {
     messageText += `今週の掃除担当はグループBです\n`;
-    for (let i = 0; i < groupBMembers.length && i < cleaningAreas.length; i++) {
-      messageText += `${cleaningAreas[i]}: <@${groupBMembers[i].user}>\n`;
-      newAssignedTasks.push({ userId: groupBMembers[i].user, location: cleaningAreas[i] });
+    for (let i = 0; i < cleaningAreas.length; i++) {
+      const member = groupBMembers[i % groupBMembers.length];
+      messageText += `${cleaningAreas[i]}: <@${member.user}>\n`;
+      newAssignedTasks.push({ userId: member.user, location: cleaningAreas[i] });
     }
   }
 
