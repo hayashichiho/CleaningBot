@@ -35,3 +35,8 @@ function showMembersList(channelId, token) {
   postMessage(channelId, `グループAのメンバー一覧: ${groupAMembers.join(', ')}`, token);
   postMessage(channelId, `グループBのメンバー一覧: ${groupBMembers.join(', ')}`, token);
 }
+
+
+function doGet(e) {
+  return ContentService.createTextOutput("このWebアプリはPOST専用です。");
+}

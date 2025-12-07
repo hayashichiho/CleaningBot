@@ -90,3 +90,60 @@ function checkMainTriggers() {
     });
   }
 }
+
+/**
+ * チャンネルの全メンバーを確認し、groupが見つからないユーザーをログ出力する
+ * 実行方法: GASエディタで `checkGroupAssignments()` を実行
+ */
+function checkGroupAssignments() {
+  const cfg = loadConfig();
+  const channelId = cfg.CHANNEL_ID;
+  const token = cfg.SLACK_BOT_TOKEN;
+
+  Logger.log('=== checkGroupAssignments 開始 ===');
+  const memberIds = fetchChannelMembers(channelId, token);
+  Logger.log('チャンネルから取得したmember ID数: ' + memberIds.length);
+
+  const unassigned = [];
+  const details = [];
+
+  memberIds.forEach(memberId => {
+    const user = fetchUserInfo(memberId, token);
+    if (!user) {
+      Logger.log('ユーザー情報取得失敗: ' + memberId);
+      return;
+    }
+
+    // ボットや自分自身は無視
+    if (user.is_bot || user.id === cfg.YOUR_BOT_USER_ID) {
+      return;
+    }
+
+    const realName = user.real_name || (user.profile && user.profile.real_name) || '';
+    const displayName = (user.profile && user.profile.display_name) || '';
+    const group = getGroup(realName);
+
+    details.push({ id: user.id, realName: realName, displayName: displayName, group: group });
+
+    if (!group) {
+      unassigned.push({ id: user.id, realName: realName, displayName: displayName });
+    }
+  });
+
+  Logger.log('--- 全メンバー詳細 ---');
+  details.forEach(d => {
+    Logger.log(`id=${d.id} real_name="${d.realName}" display_name="${d.displayName}" group=${d.group}`);
+  });
+
+  if (unassigned.length === 0) {
+    Logger.log('✅ 全員がグループに割り当てられています');
+  } else {
+    Logger.log(`❌ グループ未割当のユーザー数: ${unassigned.length}`);
+    unassigned.forEach(u => {
+      Logger.log(`未割当: id=${u.id} real_name="${u.realName}" display_name="${u.displayName}"`);
+    });
+    Logger.log('考えられる原因: 名前の表記ゆれ（全角/半角スペース，特殊文字），groups.gs のリストに未登録 等');
+  }
+
+  Logger.log('=== checkGroupAssignments 終了 ===');
+}

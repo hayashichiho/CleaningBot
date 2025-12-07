@@ -1,53 +1,61 @@
 /**
- * メンバーと場所をランダムにシャッフルする関数。
+ * main関数のロジックをテストするが、Slack投稿・スプレッドシート保存は行わない
  */
-function shuffle(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
+function testMainLogic() {
+  Logger.log('--- 🧪 testMainLogic 開始 ---');
+
+  try {
+    // 設定を読み込み
+    const config = loadConfig();
+    Logger.log('config読み込み完了: ' + JSON.stringify(config));
+
+    // 既存データを読み込み（ダミーデータでテストしたい場合はここを編集）
+    const currentData = loadData();
+    Logger.log('スプレッドシートから読み込んだデータ: ' + JSON.stringify(currentData));
+
+    // 前回のタスクの完了状況を確認
+    let incompleteTasks = [];
+    if (currentData.messageTimestamp) {
+      Logger.log('前回のメッセージのタイムスタンプ: ' + currentData.messageTimestamp);
+      // Slack APIを呼ばず、ダミーで空配列を返す場合は下記を有効化
+      // incompleteTasks = [];
+      // 通常通りロジックを使う場合は下記
+      incompleteTasks = processCompletedTasks(
+        config.CHANNEL_ID,
+        currentData.messageTimestamp,
+        currentData.assignedTasks
+      );
+    } else {
+      Logger.log('前回のタイムスタンプがないため、リアクション処理をスキップします');
+      incompleteTasks = currentData.assignedTasks;
+    }
+
+    Logger.log('リアクション処理後の未完了タスク: ' + JSON.stringify(incompleteTasks));
+
+    // 新しいタスクを割り当て（Slack投稿しないバージョンを自作）
+    const result = assignTasksWithoutPost(
+      config.CHANNEL_ID,
+      currentData.WEEK_NUMBER,
+      incompleteTasks,
+      currentData.consecutiveDays,
+      config.SLACK_BOT_TOKEN
+    );
+
+    Logger.log('割り当て完了後の結果: ' + JSON.stringify(result));
+
+    // 保存も投稿もせず、結果のみ表示
+    Logger.log('--- 🧪 testMainLogic 終了 ---');
+  } catch (error) {
+    Logger.log('エラーが発生しました: ' + error.toString());
+    Logger.log('スタックトレース: ' + error.stack);
   }
-  return array;
 }
 
 /**
- * 前回のメッセージへのリアクションを処理し、未完了タスクを返します。
+ * assignTasksのSlack投稿・タイムスタンプ取得部分を除いたテスト用関数
  */
-function processCompletedTasks(channelId, timestamp, assignedTasks) {
-  if (!timestamp) {
-    Logger.log('processCompletedTasks - タイムスタンプが空のため、全タスクを未完了として返します');
-    return assignedTasks;
-  }
-
-  Logger.log('processCompletedTasks - タイムスタンプ: ' + timestamp);
-  const reactions = getReactions(channelId, timestamp, SLACK_BOT_TOKEN);
-
-  if (reactions && reactions.length > 0) {
-    const userWhoReacted = new Set();
-    reactions.forEach(reaction => {
-      if (reaction.users && Array.isArray(reaction.users)) {
-        reaction.users.forEach(userId => userWhoReacted.add(userId));
-      }
-    });
-
-    Logger.log('processCompletedTasks - リアクションしたユーザー数: ' + userWhoReacted.size);
-    Logger.log('processCompletedTasks - リアクションしたユーザーID: ' + Array.from(userWhoReacted).join(', '));
-
-    // リアクションしたユーザーのタスクを完了と見なす
-    const incompleteTasks = assignedTasks.filter(task => !userWhoReacted.has(task.userId));
-    Logger.log('processCompletedTasks - 未完了タスク数: ' + incompleteTasks.length);
-    return incompleteTasks;
-  }
-
-  Logger.log('processCompletedTasks - リアクションが見つからないため、全タスクを未完了として返します');
-  return assignedTasks;
-}
-
-/**
- * 掃除当番を割り当て、Slackにメッセージを投稿します。
- * @returns {object} 新しい状態データ
- */
-function assignTasks(channelId, WEEK_NUMBER, incompleteTasks, consecutiveDays, token) {
-  Logger.log('--- assignTasks関数開始 ---');
+function assignTasksWithoutPost(channelId, WEEK_NUMBER, incompleteTasks, consecutiveDays, token) {
+  Logger.log('--- assignTasksWithoutPost関数開始 ---');
 
   // メンバー情報の更新と振り分け
   const memberIds = fetchChannelMembers(channelId, token);
@@ -100,7 +108,7 @@ function assignTasks(channelId, WEEK_NUMBER, incompleteTasks, consecutiveDays, t
   if (is_AGroup) {
     messageText += `今週の掃除担当はグループAです\n`;
     for (let i = 0; i < cleaningAreas.length; i++) {
-      const member = groupAMembers[i % groupAMembers.length]; // メンバーを繰り返す
+      const member = groupAMembers[i % groupAMembers.length];
       messageText += `${cleaningAreas[i]}: <@${member.user}>\n`;
       newAssignedTasks.push({ userId: member.user, location: cleaningAreas[i] });
     }
@@ -115,18 +123,15 @@ function assignTasks(channelId, WEEK_NUMBER, incompleteTasks, consecutiveDays, t
 
   Logger.log('割り当てられたタスク数: ' + newAssignedTasks.length);
 
-  // Slackにメッセージを投稿して、タイムスタンプを保存
-  const fullMessageText = `${messageTextPlase}\n${messageText}`;
-  Logger.log('投稿するメッセージ:\n' + fullMessageText);
-  const newMessageTimestamp = postMessage(channelId, fullMessageText, token);
-  Logger.log('assignTasks - 取得したタイムスタンプ: ' + newMessageTimestamp);
+  // Slack投稿・タイムスタンプ取得は行わない
+  Logger.log('投稿するメッセージ（テスト用）:\n' + (messageTextPlase + '\n' + messageText));
 
-  Logger.log('--- assignTasks関数終了 ---');
+  Logger.log('--- assignTasksWithoutPost関数終了 ---');
 
   return {
     WEEK_NUMBER: newWEEK_NUMBER,
     assignedTasks: newAssignedTasks,
     consecutiveDays: newConsecutiveDays,
-    messageTimestamp: newMessageTimestamp || ''
+    messageTimestamp: '' // 投稿しないので空
   };
 }

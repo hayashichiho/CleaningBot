@@ -1,10 +1,10 @@
 const cleaningLocations = [
- '201',
- '203',
- '204',
- '205',
- 'corridor',
- 'sink',
+  '201',
+  '203',
+  '204',
+  '205',
+  'corridor',
+  'sink',
 ];
 
 function getLocations() {
@@ -15,5 +15,5 @@ function getLocations() {
     return cleaningLocations;
   } else { // 奇数月の場合
     return cleaningLocations.filter(location => location !== 'corridor' && location !== 'sink');
- }
+  }
 };
