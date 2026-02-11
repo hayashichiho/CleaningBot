@@ -59,3 +59,58 @@ function main() {
 
   Logger.log('--- ✅ スクリプト終了 ---');
 }
+
+/**
+ * 木曜時点で未リアクションのメンバーにDMでリマインドする
+ */
+function sendReminderDMs() {
+  Logger.log('--- 🔔 リマインダー送信開始 ---');
+
+  try {
+    const config = loadConfig();
+    const currentData = loadData();
+
+    if (!currentData.messageTimestamp) {
+      Logger.log('リマインダー送信をスキップ: messageTimestamp がありません');
+      return;
+    }
+
+    if (!currentData.assignedTasks || currentData.assignedTasks.length === 0) {
+      Logger.log('リマインダー送信をスキップ: assignedTasks が空です');
+      return;
+    }
+
+    const incompleteTasks = processCompletedTasks(
+      config.CHANNEL_ID,
+      currentData.messageTimestamp,
+      currentData.assignedTasks
+    );
+
+    if (!incompleteTasks || incompleteTasks.length === 0) {
+      Logger.log('未リアクションのメンバーはいません。DM送信なし。');
+      return;
+    }
+
+    let successCount = 0;
+
+    incompleteTasks.forEach(task => {
+      const reminderText =
+        `こんにちは！お掃除がまだ完了していないみたいです．\n` +
+        `担当エリア: ${task.location}\n` +
+        `土曜日までに掃除とチェンネルの投稿へのリアクションをお願いします．\n` +
+        `※掃除方法は，「隔週の掃除担当」チャンネルのファイルタブに記載しています．`
+        ;
+
+      if (sendDirectMessage(task.userId, reminderText, config.SLACK_BOT_TOKEN)) {
+        successCount += 1;
+      }
+    });
+
+    Logger.log(`リマインダー送信完了: ${successCount}/${incompleteTasks.length}件のDMを送信しました`);
+  } catch (error) {
+    Logger.log('sendReminderDMsでエラーが発生しました: ' + error.toString());
+    Logger.log('スタックトレース: ' + error.stack);
+  }
+
+  Logger.log('--- 🔔 リマインダー送信終了 ---');
+}

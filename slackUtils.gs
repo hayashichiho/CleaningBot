@@ -81,6 +81,49 @@ function postMessage(channelId, text, token) {
 }
 
 /**
+ * 指定したユーザーとのDMチャンネルを開く
+ */
+function openDirectMessageChannel(userId, token) {
+  const url = 'https://slack.com/api/conversations.open';
+  const options = {
+    method: 'post',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    payload: JSON.stringify({
+      users: userId
+    }),
+    muteHttpExceptions: true
+  };
+
+  try {
+    const response = UrlFetchApp.fetch(url, options);
+    const json = JSON.parse(response.getContentText());
+    if (json.ok && json.channel && json.channel.id) {
+      return json.channel.id;
+    }
+    Logger.log('conversations.open APIエラー: ' + JSON.stringify(json));
+    return null;
+  } catch (e) {
+    Logger.log('conversations.open APIでエラーが発生しました: ' + e.message);
+    return null;
+  }
+}
+
+/**
+ * ユーザーにDMを送る
+ */
+function sendDirectMessage(userId, text, token) {
+  const dmChannel = openDirectMessageChannel(userId, token);
+  if (!dmChannel) {
+    Logger.log('DMチャンネル取得に失敗したため、メッセージを送れませんでした: ' + userId);
+    return false;
+  }
+  return Boolean(postMessage(dmChannel, text, token));
+}
+
+/**
  * 前回のメッセージへのリアクションを取得する関数
  * @returns {Array} リアクションの配列
  */
